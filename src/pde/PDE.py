@@ -1,10 +1,10 @@
+
 import numpy as np
 from typing import Callable, List, Union, Tuple, Optional, Generator
 from numpy.typing import DTypeLike, ArrayLike
-from scipy.stats import norm
-import matplotlib.pyplot as plt
-from matplotlib import cm
 
+from config.modelConfig import modelConfig
+from pde.config.pdeConfig import pdeConfig
 """
 The PDE solution to the Lender and Borrower interest rates
 """
@@ -195,7 +195,38 @@ def approximateOptionPrice(S0: float,
 ### End: Auxiliary functions for PDE solver
 
 ### Start: PDE solver
-def PDEsolver(S0: float, 
+
+def PDEsolver(model_config: modelConfig,
+              pde_config: pdeConfig) -> tuple[float, np.array, np.array, np.array]:
+    """
+    PDE solver interface. PDE solver for the Borrower and Lender interest rates problem. 
+    Uses finite differences theta scheme to find a numerical solution. 
+    Parameters:
+    ----------
+    model_config : modelConfig
+        Config class containing the general model parameters.
+    pde_config : pdeConfig
+        Config class containing the specific parameters for the pde solver.
+    
+    Returns:
+    ----------
+    float : 
+        Option price given the spot price
+    np.array(Nt+1, 1) :
+        Time domain
+    np.array(Ns+2, 1) :
+        Spatial domain
+    np.array(Ns+2, Nt+1) : 
+        Array of the function value of the solution function 
+    """
+
+    (S0, K, sigma, R, r) = (model_config.S0, model_config.K, model_config.sigma, model_config.R, model_config.r)
+
+    (Ns, S_min, S_max, Nt, t_min, t_max, theta) = (pde_config.Ns, pde_config.s_min, pde_config.s_max, pde_config.Nt, pde_config.t_min, pde_config.t_max, pde_config.theta)
+    
+    return solver(S0, K, sigma, R, r, Ns, S_min, S_max, Nt, t_min, t_max, theta)
+
+def solver(S0: float, 
               K: float, 
               sigma: float, 
               R: float, 

@@ -3,8 +3,11 @@ from typing import Callable, List, Union, Tuple, Optional, Generator
 from numpy.typing import DTypeLike, ArrayLike
 from scipy.stats import norm
 
-from PDE import PDEsolver
-from FBSDE import FBSDEsolver
+from pde.PDE import PDEsolver
+#from fbsde.FBSDE import FBSDEsolver
+
+from config.modelConfig import modelConfig
+from pde.config.pdeConfig import pdeConfig
 
 """
 Example usage of the implementations for the Lender and Borrower interest rates
@@ -26,7 +29,7 @@ def main():
     
     A pretty light workload, around 10 seconds on an average laptop. 
     """
-    
+
     # Model params
     T = 0.5
     mu = 0.06
@@ -44,18 +47,21 @@ def main():
     s_min = 1
     t_max = T
     t_min = 0
-
+    
+    mod_conf = modelConfig()
+    pde_conf = pdeConfig()
+    print(mod_conf.sigma)
     # PDE numerical solution
-    u0, t, s, u = PDEsolver(S0, K, sigma, R, r, Ns, s_min, s_max, Nt, t_min, t_max, theta)
+    u0, t, s, u = PDEsolver(mod_conf, pde_conf)
 
     # FBSDE-scheme params
     N = 100
     M = 200000 
 
     # FBSDE numerical solution
-    Y0, Yt, Zt = FBSDEsolver(S0, K, mu, sigma, R, r, T, M, N)
+    #Y0, Yt, Zt = FBSDEsolver(S0, K, mu, sigma, R, r, T, M, N)
 
-    print(f"PDE numerical solution: {u0:.4f}\nFBSDE numerical solution: {Y0:.4f}\nAnalytical solution: {analyticalSolution(S0, K, R, sigma, T):.4f}")
+    print(f"PDE numerical solution: {u0:.4f}\nFBSDE numerical solution: {0:.4f}\nAnalytical solution: {analyticalSolution(S0, K, R, sigma, T):.4f}")
 
 
 if __name__ == "__main__":
