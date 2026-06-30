@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from numbers import Real
+from blackScholesSolver.errors.Errors import InvalidConfigError
 
 @dataclass
 class modelConfig:
@@ -20,17 +22,45 @@ class modelConfig:
     S0 : float
         Initial stock price 
     """
-    T = 0.5
-    sigma = 0.2
-    r = 0.04
-    R = 0.06
-    mu = 0.06
-    K = 100
-    S0 = 100
+    T: float = 0.5
+    sigma: float = 0.2
+    r: float = 0.04
+    R: float = 0.06
+    mu: float = 0.06
+    K: float = 100
+    S0: float = 100
 
+    
+
+    def __post_init__(self):
+        """
+        Model config validation
+        """
+        self.params = [self.S0, self.K, self.sigma, self.R, self.r, self.mu, self.T]
+        self._checkDatatype()
+        self._checkPositivity()
+
+    def _checkDatatype(self):
+        """
+        Validates that the user input is of the correct datatype.
+        """
+
+        for par in self.params:
+            
+            if not isinstance(par, Real):
+                raise InvalidConfigError("Parameters must be of type float or integer.")
+
+    def _checkPositivity(self):
+        """
+        Since all parameters of the model must be positive we perform validation.
+        """
+        for par in self.params:
+            if not par >= 0:
+                raise InvalidConfigError("Parameters must be greater or equal to zero.")
+            
     def extractParams(self):
         """
         Extracts model parameters.
         """
         
-        return (self.S0, self.K, self.sigma, self.R, self.r, self.mu, self.T)
+        return self.params 
