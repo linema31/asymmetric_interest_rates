@@ -3,8 +3,8 @@ import numpy as np
 from typing import Callable, List, Union, Tuple, Optional, Generator
 from numpy.typing import DTypeLike, ArrayLike
 
-from config.modelConfig import modelConfig
-from pde.config.pdeConfig import pdeConfig
+from blackScholesSolver.config.modelConfig import modelConfig
+from blackScholesSolver.pde.config.pdeConfig import pdeConfig
 """
 The PDE solution to the Lender and Borrower interest rates
 """
@@ -220,9 +220,9 @@ def PDEsolver(model_config: modelConfig,
         Array of the function value of the solution function 
     """
 
-    (S0, K, sigma, R, r) = (model_config.S0, model_config.K, model_config.sigma, model_config.R, model_config.r)
+    (S0, K, sigma, R, r, _, __) = model_config.extractParams()
 
-    (Ns, S_min, S_max, Nt, t_min, t_max, theta) = (pde_config.Ns, pde_config.s_min, pde_config.s_max, pde_config.Nt, pde_config.t_min, pde_config.t_max, pde_config.theta)
+    (Ns, S_min, S_max, Nt, t_min, t_max, theta) = pde_config.extractParams() 
     
     return solver(S0, K, sigma, R, r, Ns, S_min, S_max, Nt, t_min, t_max, theta)
 

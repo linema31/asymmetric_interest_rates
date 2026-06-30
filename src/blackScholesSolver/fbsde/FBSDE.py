@@ -6,7 +6,10 @@ from scipy.stats import norm
 
 import matplotlib.pyplot as plt
 
-from forward import blackScholes, generateBrownianMotion
+from blackScholesSolver.fbsde.config.fbsdeConfig import fbsdeConfig
+from blackScholesSolver.config.modelConfig import modelConfig
+
+from blackScholesSolver.fbsde.forward import blackScholes, generateBrownianMotion
 
 """
 The FBSDE solution to the Lender and Borrower interest rates.
@@ -125,8 +128,33 @@ def payOff(ST: np.array,
 
     return np.maximum(ST-K, 0)
 
+def FBSDEsolver(model_config: modelConfig,
+                fbsde_config: fbsdeConfig) -> tuple[float, np.array, np.array]:
+    """
+    FBSDE interface for solving numerical problem. 
+    Parameters:
+    -----------
+    model_config : modelConfig
+        Config class containing the general model parameters.
+    fbsde_config : fbsdeConfig
+        Config class containing the specific parameters for the fbsde solver
+    Returns:
+    --------
+    float : 
+        The approximated option price.
+    np.array(M, N) : 
+        The pricing process for all M trajectories.
+    np.array(M, N-1) :
+        The hedging process for all M trajectories.
+    
+    """
 
-def FBSDEsolver(S0: float, 
+    (S0, K, sigma, R, r, mu, T) = model_config.extractParams()
+    (M, N) = fbsde_config.extractParams()
+
+    return solver(S0, K, mu, sigma, R, r, T, M, N)
+
+def solver(S0: float, 
                 K: float, 
                 mu: float, 
                 sigma: float, 

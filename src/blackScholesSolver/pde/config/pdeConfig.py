@@ -28,3 +28,9 @@ class pdeConfig:
     s_min = 1
     t_max = 0.5
     t_min = 0
+
+    def extractParams(self):
+        """
+        Extracts the parameters of the config class.
+        """
+        return (self.Ns, self.s_min, self.s_max, self.Nt, self.t_min, self.t_max, self.theta)

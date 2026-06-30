@@ -4,9 +4,10 @@ Polishing of the university project on pricing an european call option with vary
 
 ## Done
 - [x] Config class for the pde solver
+- [x] Config implementation for fbsde solver
 
 ## Left to do
-- [ ] Config implementation for fbsde solver
+- [ ] Handle user error when configuring model parameters, for all numerical tests and actual model params. 
 - [ ] Polish both implementations a bit more
 - [ ] Get the documentation up.
 

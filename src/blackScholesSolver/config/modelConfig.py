@@ -27,3 +27,10 @@ class modelConfig:
     mu = 0.06
     K = 100
     S0 = 100
+
+    def extractParams(self):
+        """
+        Extracts model parameters.
+        """
+        
+        return (self.S0, self.K, self.sigma, self.R, self.r, self.mu, self.T)
