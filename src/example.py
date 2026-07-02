@@ -21,11 +21,11 @@ def main():
     mod_conf = modelConfig()
     
     pde_conf = pdeConfig()
+
     fbsde_conf = fbsdeConfig()
-    # PDE numerical solution
+
     u0, t, s, u = PDEsolver(mod_conf, pde_conf)
 
-    # FBSDE numerical solution
     Y0, Yt, Zt = FBSDEsolver(mod_conf, fbsde_conf)
 
     print(f"PDE numerical solution: {u0:.4f}\nFBSDE numerical solution: {Y0:.4f}")
