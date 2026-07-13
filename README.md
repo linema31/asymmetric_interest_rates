@@ -1,32 +1,5 @@
 # Asymmetric interst rates - Pricing an European call option.
 
-### Disclaimer
-Polishing of the university project on pricing an european call option with varying interest rates for borrowing and lending money. This project was initially done as part of a course in Monte Carlo methods for financial applications. Since then I have reworked some of the ideas and how it was implemented. This project is not affiliated with any institution or person from Umeå University. 
-
-
-## Project documentation
-For more in depth explanation and reasoning surrounding the problem and solutions, see the report in `docs/`.
-## Workflow left to do
-Below is what is left to do for this project.
-### Done
-- [x] Config class for the pde solver
-- [x] Config implementation for fbsde solver
-- [x] Handle user error when configuring model parameters, for all numerical tests and actual model params. 
-
-### Left to do
-- [ ] Polish both implementations a bit more.
-- [ ] Add testing.
-- [ ] Make repo public.
-- [ ] Get the documentation up.
-- [ ] Integrate fields for error handling.
-
-
-Probably a lot more to do real soon.
-
-Below is the Polished README:
-
-# Black-Scholes Solvers
-
 > Numerical implementations of the Black-Scholes model using both a finite difference (PDE) solver and a Forward-Backward Stochastic Differential Equation (FBSDE) solver.
 
 ---
@@ -46,57 +19,46 @@ This project studies the application of asymmetric interest rates on the pricing
 - Configurable model parameters.
 - Input validation.
 - Example script.
-- Modular package structure
 
 ---
 
 ## Repository Structure
 
 ```text
-.
-├── examples/
-├── docs/
-|-- figures/
-├── src/
-│   └── blackScholesSolver/
-│       ├── config/
-│       ├── pde/
-│       ├── fbsde/
-│       ├── 
-│       └── ...
-├── tests/
-├── README.md
-└── pyproject.toml
+docs/
+figures/
+src/
+    blackScholesSolver/
+        config/
+        errors/
+        fbsde/
+        pde/
+    examples/
 ```
 
-To briefly explain the structure of the repository:
 - `docs/` - Contains the report associated with the project.
 - `figures/` - Contains the Figures used throughout the Result section of this README.md.
 - `src/blackScholesSolver/` - Contains the source code of the project.  
+- `examples/` - Contains the example files for the implementation.
 
 ---
 
 ## Installation
 
-Explain how to clone and install the project.
+Download and install by:
 
 ```bash
-git clone ...
-cd ...
-
-pip install -e .
-```
-
-or
-
-```bash
+git clone https://github.com/linema31/asymmetric_interest_rates.git
+cd asymmetric_interest_rates
 pip install -r requirements.txt
 ```
 
-Mention supported Python version if applicable.
+Run a simple example:
 
----
-
+```bash
+cd src/
+python3 -m examples/example
+```
 ## Quick Start
 
 ```python
@@ -119,143 +81,92 @@ print(f"Price using fbsde: {Y0:.4f}\n")
 
 ---
 
-## Examples
-
-Describe the available example scripts.
-
-For example:
-
-- Basic PDE pricing
-- Basic FBSDE pricing
-- Parameter comparison
-- Convergence study
-- Runtime comparison
-
----
-
 ## Mathematical Background
+In this section we describe the problem this implementation is solving and the methods for the implementation. For specific details regarding the problem and solution see `docs/lender_borrower_interest_rates.pdf`.
 
-Provide a high-level explanation of the implemented methods.
+### Problem
+This project studies the pricing of a European call option in a modified Black–Scholes framework with asymmetric borrowing and lending interest rates. Unlike the classical model, the interest rate depends on the cash position of the replicating portfolio, introducing a nonlinear term into the pricing equation.
 
-Keep this concise.
+The option price is governed by the nonlinear Black–Scholes PDE
 
-Point interested readers to the report for derivations.
+$$
+\frac{\partial u}{\partial t} + \frac{1}{2} \sigma^2 S^2 \frac{ \partial^2 u}{\partial S^2} = 
+\rho \left(u-S\frac{\partial u}{\partial S}\right)
+\left(u-S\frac{\partial u}{\partial S}\right),
+$$
 
-Example:
+where
 
->The PDE solver discretizes the Black-Scholes equation using finite differences.
->The stochastic solver reformulates the pricing problem as an FBSDE.
+$$
+\rho(x)=
+\begin{cases}
+r, & x\ge0,\\
+R, & x<0,
+\end{cases}
+\qquad R\ge r.
+$$
 
-For complete derivations, see:
+To solve this nonlinear pricing problem, two independent numerical approaches are implemented: a deterministic PDE solver and a probabilistic FBSDE solver.
 
-```
-report/report.pdf
-```
+### PDE solution
+The deterministic formulation is solved using a Crank–Nicolson finite difference scheme on a uniform space-time grid. Since the active interest rate depends on the cash position, the nonlinear term is updated iteratively throughout the backward time-stepping procedure. The option price at the initial stock value is recovered using second-order Taylor interpolation.
 
----
+### FBSDE solution
+The probabilistic formulation is solved using a Forward–Backward Stochastic Differential Equation (FBSDE) framework. Stock price trajectories are simulated exactly under geometric Brownian motion, after which the BSDE is solved backwards in time. Conditional expectations are approximated using least-squares polynomial regression, producing a Monte Carlo estimate of the option price.
+
 
 ## Results
+In this section we briefly describe the result found in the report. This includes insights as well as validation. 
 
-Present the most important numerical results.
+Both numerical methods converge to the same solution and agree with the analytical Black–Scholes price obtained by using the borrowing rate only. Convergence studies confirm that the numerical error decreases with increasing spatial resolution for the PDE method and with increasing sample size for the FBSDE method.
 
-Possible content:
+Below we can see a surface plot generated by the implementation. From this we can read the solution price given any initial stock price.
 
-- Pricing accuracy
-- Runtime comparison
-- Convergence plots
-- Error analysis
+<div style="text-align: center;>
 
-Include figures if possible.
+![Alt Image Text](figures/res_surface_003.png "Surface plot of solution matrix.")
 
-Example:
+</div>
 
-![Convergence](images/convergence.png)
+Below is a line plot comparing th numerical PDE solution to the analytical solution for the Black-Scholes PDE.
 
----
+<div style="text-align: center;>
 
-## Design Decisions
+![Alt Image Text](figures/res_comparison_001.png "Line plot comparing analytical solution to numerical pde solution. ")
 
-Explain the software architecture.
+</div>
 
-Possible topics:
+To notice is that the numerical price coincide with the analytical price, even though the analytical price does not take the differing interest rates into account. 
 
-- Why dataclasses were used for configuration
-- Validation strategy
-- Package organization
-- Separation between models and solvers
-- Choice of numerical methods
+We investigate how the analytical solution differs from the numerical solution using Root mean square error (RMSE) which can be seen in the line plot below.
 
-This section demonstrates software engineering rather than mathematics.
+<div style="text-align: center;>
 
----
+![Alt Image Text](figures/res_rmse_conv_001.png "Logarithmic line plot of RMSE for increasing number of grid points.")
 
-## Testing
+</div>
 
-Describe the testing strategy.
+From the plot above one can see that the solution does converge to the analytical solution as the number of grid points increases.
 
-Example:
+A similar convergence test is done for the probabilistic framework using monte carlo estimates. Where we increased the number of trajectories. This can be seen in the line plot below.
+<div style="text-align: center;>
 
-```bash
-pytest
-```
+![Alt Image Text](figures/res_FBSDE_001.png "Logarithmic line plot of RMSE for increasing number of trajectories.")
 
-Mention what kinds of functionality are tested.
+</div>
+From the convergence study above we see that the FBSDE solution does indeed also converge to the analytical solution for the Black-Scholes PDE. Using these convergence results we validated both numerical models for the pricing problem.
 
----
-
-## Future Improvements
-
-Ideas that could naturally extend the project.
-
-Example:
-
-- American options
-- Barrier options
-- GPU acceleration
-- Adaptive meshing
-- Additional stochastic volatility models
+The main conclusion is that, for this pricing problem, the lending rate has no influence on the option value because the replicating strategy never enters a lending position. Consequently, the nonlinear model produces the same price as the classical Black–Scholes model using the borrowing interest rate.
 
 ---
 
 ## Educational Context
 
-Briefly explain the project's origin.
-
-Example:
-
->This repository originated from a university laboratory project in computational finance. The codebase has since been substantially refactored with improved software architecture, documentation, validation, and packaging. The repository is maintained independently and is not affiliated with or endorsed by the university.
+>This repository originated from a university laboratory project in computational finance. The codebase has since been substantially refactored with improved software architecture, documentation and validation. The repository is maintained independently and is not affiliated with or endorsed by the university.
 
 ---
 
-## References
-
-Include references to:
-
-- Black & Scholes (1973)
-- Any textbooks
-- Numerical methods references
-- Course report
-
----
-
-## License
-
-Specify the license.
-
-Example:
-
-MIT License
-
----
 
 ## Author
 
-Your name
-
-Short sentence about the project.
-
-Optionally include links to:
-
-- LinkedIn
-- Personal website
-- Other repositories
+Linus Emanuel
