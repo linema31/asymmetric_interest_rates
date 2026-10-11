@@ -1,24 +1,24 @@
-# Asymmetric interst rates - Pricing an European call option.
+# Asymmetric Interest Rates for European Call Option Pricing
 
-> Numerical implementations of the Black-Scholes model using both a finite difference (PDE) solver and a Forward-Backward Stochastic Differential Equation (FBSDE) solver.
+> Numerical implementations of a finite-difference PDE solver and a forward-backward stochastic differential equation (FBSDE) solver for pricing a European call option with asymmetric borrowing and lending rates.
 
 ---
 
 ## Overview
 
-This project studies the application of asymmetric interest rates on the pricing of an European call option. The differing interest rates represents the realistic setting where an investor generally pays a higher interest rate when borrowing than what the investor recieves as a lender. This is applied to the Black-Scholes model. We price the European call option using numerical methods based on a Partial Differential Equation framework and a Forward Backwards Stochastic Differential Equation framework. We conclude that the interest rate for lending money has no impact on the solution since we are in fact never lending money to finance the replicating trading strategy.
+This project studies European call option pricing in a Black–Scholes framework with asymmetric borrowing and lending interest rates. The model reflects the common setting in which the borrowing rate is higher than the lending rate.
 
->The project originated as part of a university course in computational finance and has since been refactored into a reusable Python package with improved software architecture, documentation, validation, and examples.
+Two numerical approaches are implemented: a finite-difference solver for the associated nonlinear partial differential equation (PDE) and a forward-backward stochastic differential equation (FBSDE) solver. For the studied pricing problem, both approaches agree with the Black–Scholes price obtained using the borrowing rate: the replicating strategy does not enter a lending position, so the lending rate does not affect the option value.
 
 ---
 
 ## Features
 
-- Finite Difference (PDE) solver. Including Crank Nicolson, Explicit- and Implicit Euler. 
-- FBSDE solver.
-- Configurable model parameters.
-- Input validation.
-- Example script.
+- Finite-difference PDE solver with Crank–Nicolson, explicit Euler, and implicit Euler schemes
+- FBSDE solver based on Monte Carlo simulation and least-squares polynomial regression
+- Configurable model and solver parameters
+- Input validation for configuration parameters
+- Runnable example
 
 ---
 
@@ -36,29 +36,28 @@ src/
     examples/
 ```
 
-- `docs/` - Contains the report associated with the project.
-- `figures/` - Contains the Figures used throughout the Result section of this README.md.
-- `src/blackScholesSolver/` - Contains the source code of the project.  
-- `examples/` - Contains the example files for the implementation.
+- `docs/` contains the accompanying project report.
+- `figures/` contains the figures displayed in this README.
+- `src/blackScholesSolver/` contains the solver implementation.
+- `src/examples/` contains runnable examples.
 
 ---
 
 ## Installation
 
-Download and install by:
-
 ```bash
 git clone https://github.com/linema31/asymmetric_interest_rates.git
 cd asymmetric_interest_rates
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
-Run a simple example:
+## Run the example
 
 ```bash
-cd src/
-python3 -m examples/example
+cd src
+python3 -m examples.example
 ```
+
 ## Quick Start
 
 ```python
@@ -74,17 +73,18 @@ u0, t, s, u = PDEsolver(mod_config, pde_config)
 
 Y0, Yt, Zt = FBSDEsolver(mod_config, fbsde_config)
 
-print(f"Price using pde: {u0:.4f}\n")
-print(f"Price using fbsde: {Y0:.4f}\n")
-
+print(f"PDE price: {u0:.4f}")
+print(f"FBSDE price: {Y0:.4f}")
 ```
 
 ---
 
 ## Mathematical Background
-In this section we describe the problem this implementation is solving and the methods for the implementation. For specific details regarding the problem and solution see `docs/lender_borrower_interest_rates.pdf`.
+
+This section describes the pricing problem and the numerical methods implemented here. For specific details regarding the problem and solution, see `docs/lender_borrower_interest_rates.pdf`.
 
 ### Problem
+
 This project studies the pricing of a European call option in a modified Black–Scholes framework with asymmetric borrowing and lending interest rates. Unlike the classical model, the interest rate depends on the cash position of the replicating portfolio, introducing a nonlinear term into the pricing equation.
 
 The option price is governed by the nonlinear Black–Scholes PDE
@@ -109,52 +109,54 @@ $$
 To solve this nonlinear pricing problem, two independent numerical approaches are implemented: a deterministic PDE solver and a probabilistic FBSDE solver.
 
 ### PDE solution
-The deterministic formulation is solved using a Crank–Nicolson finite difference scheme on a uniform space-time grid. Since the active interest rate depends on the cash position, the nonlinear term is updated iteratively throughout the backward time-stepping procedure. The option price at the initial stock value is recovered using second-order Taylor interpolation.
+
+The deterministic formulation is solved using a Crank–Nicolson finite-difference scheme on a uniform space-time grid. Since the active interest rate depends on the cash position, the nonlinear term is updated iteratively throughout the backward time-stepping procedure. The option price at the initial stock value is recovered using second-order Taylor interpolation.
 
 ### FBSDE solution
-The probabilistic formulation is solved using a Forward–Backward Stochastic Differential Equation (FBSDE) framework. Stock price trajectories are simulated exactly under geometric Brownian motion, after which the BSDE is solved backwards in time. Conditional expectations are approximated using least-squares polynomial regression, producing a Monte Carlo estimate of the option price.
 
+The probabilistic formulation is solved using a Forward–Backward Stochastic Differential Equation (FBSDE) framework. Stock price trajectories are simulated exactly under geometric Brownian motion, after which the BSDE is solved backward in time. Conditional expectations are approximated using least-squares polynomial regression, producing a Monte Carlo estimate of the option price.
 
 ## Results
-In this section we briefly describe the result found in the report. This includes insights as well as validation. 
 
-Both numerical methods converge to the same solution and agree with the analytical Black–Scholes price obtained by using the borrowing rate only. Convergence studies confirm that the numerical error decreases with increasing spatial resolution for the PDE method and with increasing sample size for the FBSDE method.
+The two numerical methods converge to the same solution and agree with the analytical Black–Scholes price calculated using the borrowing rate. The convergence studies show decreasing error as the PDE spatial resolution and the number of FBSDE simulation paths increase.
 
-Below we can see a surface plot generated by the implementation. From this we can read the solution price given any initial stock price.
-
-<div style="text-align: center;">
-
-![Alt Image Text](figures/res_surface_003.png "Surface plot of solution matrix.")
-
-</div>
-
-Below is a line plot comparing th numerical PDE solution to the analytical solution for the Black-Scholes PDE.
+The following surface shows the numerical option value over the spatial and temporal grid.
 
 <div style="text-align: center;">
 
-![Alt Image Text](figures/res_comparison_001.png "Line plot comparing analytical solution to numerical pde solution. ")
+![Numerical PDE solution surface](figures/res_surface_003.png "Surface plot of solution matrix.")
 
 </div>
 
-To notice is that the numerical price coincide with the analytical price, even though the analytical price does not take the differing interest rates into account. 
-
-We investigate how the analytical solution differs from the numerical solution using Root mean square error (RMSE) which can be seen in the line plot below.
+The following comparison shows the numerical PDE solution and the analytical Black–Scholes solution.
 
 <div style="text-align: center;">
 
-![Alt Image Text](figures/res_rmse_conv_001.png "Logarithmic line plot of RMSE for increasing number of grid points.")
+![Numerical PDE and analytical Black–Scholes solution comparison](figures/res_comparison_001.png "Line plot comparing analytical solution to numerical PDE solution.")
 
 </div>
 
-From the plot above one can see that the solution does converge to the analytical solution as the number of grid points increases.
+The numerical and analytical prices coincide, even though the analytical price does not account for different interest rates.
 
-A similar convergence test is done for the probabilistic framework using monte carlo estimates. Where we increased the number of trajectories. This can be seen in the line plot below.
+The root mean square error (RMSE) compares the analytical and numerical solutions.
+
 <div style="text-align: center;">
 
-![Alt Image Text](figures/res_FBSDE_001.png "Logarithmic line plot of RMSE for increasing number of trajectories.")
+![PDE RMSE convergence as spatial resolution increases](figures/res_rmse_conv_001.png "Logarithmic line plot of RMSE for increasing number of grid points.")
 
 </div>
-From the convergence study above we see that the FBSDE solution does indeed also converge to the analytical solution for the Black-Scholes PDE. Using these convergence results we validated both numerical models for the pricing problem.
+
+The RMSE plot shows that the PDE solution converges toward the analytical solution as the number of spatial grid points increases.
+
+The FBSDE convergence study uses Monte Carlo estimates with an increasing number of simulated trajectories.
+
+<div style="text-align: center;">
+
+![FBSDE RMSE convergence as the number of simulated trajectories increases](figures/res_FBSDE_001.png "Logarithmic line plot of RMSE for increasing number of trajectories.")
+
+</div>
+
+The FBSDE convergence study shows decreasing error as the number of simulated trajectories increases.
 
 The main conclusion is that, for this pricing problem, the lending rate has no influence on the option value because the replicating strategy never enters a lending position. Consequently, the nonlinear model produces the same price as the classical Black–Scholes model using the borrowing interest rate.
 
@@ -162,10 +164,9 @@ The main conclusion is that, for this pricing problem, the lending rate has no i
 
 ## Educational Context
 
->This repository originated from a university laboratory project in computational finance. The codebase has since been substantially refactored with improved software architecture, documentation and validation. The repository is maintained independently and is not affiliated with or endorsed by the university.
+This repository originated as a university laboratory project in computational finance and is maintained independently.
 
 ---
-
 
 ## Author
 

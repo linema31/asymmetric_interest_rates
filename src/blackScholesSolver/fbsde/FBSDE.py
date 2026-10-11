@@ -1,10 +1,5 @@
 
 import numpy as np
-from typing import Callable, List, Union, Tuple, Optional, Generator
-from numpy.typing import DTypeLike, ArrayLike
-from scipy.stats import norm
-
-import matplotlib.pyplot as plt
 
 from blackScholesSolver.fbsde.config.fbsdeConfig import fbsdeConfig
 from blackScholesSolver.config.modelConfig import modelConfig
@@ -198,7 +193,7 @@ def solver(S0: float,
     dt = T/(N-1)
 
     # Generate driving brownians and driving SDE for the stock.
-    dW, Wt = generateBrownianMotion(T, N, M)
+    dW, _ = generateBrownianMotion(T, N, M)
     St = blackScholes(S0, T, mu, sigma, dW, N, M)
     
     # Initializing processes
@@ -215,10 +210,3 @@ def solver(S0: float,
         Yt[:, j] = Yt_cond + nonLinearFunction(j*dt, Yt[:, j+1], Zt[:, j], mu, sigma, r, R)*dt
     
     return np.mean(Yt[:, 0]), Yt, Zt
-
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()

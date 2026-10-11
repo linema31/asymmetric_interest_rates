@@ -1,8 +1,3 @@
-import numpy as np
-from typing import Callable, List, Union, Tuple, Optional, Generator
-from numpy.typing import DTypeLike, ArrayLike
-from scipy.stats import norm
-
 from blackScholesSolver import modelConfig, pdeConfig, fbsdeConfig, PDEsolver, FBSDEsolver
 
 """
@@ -28,7 +23,8 @@ def main():
 
     Y0, Yt, Zt = FBSDEsolver(mod_conf, fbsde_conf)
 
-    print(f"PDE numerical solution: {u0:.4f}\nFBSDE numerical solution: {Y0:.4f}")
+    print(f"PDE price: {u0:.4f}")
+    print(f"FBSDE price: {Y0:.4f}")
 
 
 if __name__ == "__main__":

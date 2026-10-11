@@ -1,7 +1,5 @@
 
 import numpy as np
-from typing import Callable, List, Union, Tuple, Optional, Generator
-from numpy.typing import DTypeLike, ArrayLike
 
 from blackScholesSolver.config.modelConfig import modelConfig
 from blackScholesSolver.pde.config.pdeConfig import pdeConfig
@@ -336,12 +334,3 @@ def solver(S0: float,
     return u0, t, s, u
     
 ### End: PDE solver
-
-
-def main():
-
-    pass
-
-
-if __name__ == "__main__":
-    main()

@@ -1,9 +1,5 @@
 import numpy as np
-from typing import Callable, List, Union, Tuple, Optional, Generator
-from numpy.typing import DTypeLike, ArrayLike
-from scipy.stats import norm
-
-import matplotlib.pyplot as plt
+from typing import Union, Tuple
 
 """
 Code for the forward part of the FBSDE
@@ -89,9 +85,3 @@ def blackScholes(S0:float,
         St[:, j+1] = St[:, j]*np.exp(dt*(mu - sigma**2 / 2) + sigma *dW[:, j])
     
     return St
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()
